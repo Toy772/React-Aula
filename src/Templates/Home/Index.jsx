@@ -3,6 +3,7 @@ import { Component } from 'react';
 import { PostCard } from '../../Components/PostCard/Index';
 import { loadPosts } from '../../Components/LoadPosts/LoadPosts';
 import { Button } from '../../Components/Button/Index';
+import { TextInput } from '../../Components/TextInput/Index';
 
  export class Home extends Component{
 
@@ -10,7 +11,8 @@ import { Button } from '../../Components/Button/Index';
    posts:[],
    allPosts:[],
    page:0,
-   postPerPage:99,
+   postPerPage:6,
+   Search_value: '',
   };
 
 
@@ -49,21 +51,58 @@ import { Button } from '../../Components/Button/Index';
     this.setState({posts, page : nextPage});
   }
 
+  handleChange = (e) =>{
+    const {value} = e.target;
+    this.setState({Search_value:value})
+  }
+
 
   render(){
 
-    const {posts, page , postPerPage, allPosts } = this.state;
+    const {posts, page , postPerPage, allPosts,Search_value } = this.state;
     const noMorePosts = page + postPerPage >= allPosts.length;
+
+    const filteredPosts = !!Search_value ? 
+    allPosts.filter(post => {
+      return post.title.toLowerCase().includes(Search_value.toLowerCase());
+    }) : posts;
     return (
-      <section className='Container'> 
-        <div className='posts'>
-          {posts.map(post =>(
-            <PostCard key={post.id} post = {post} > </PostCard>
-          )           
+      <section className='Container'>
+        <div className='search-Container'>
+          {!!Search_value &&(
+            <h1> Search Value: {Search_value}</h1>
+          )}
+       
+          <TextInput 
+            Search_value = {Search_value}
+            handleChange = {this.handleChange}>
+          </TextInput>
+        </div>
+     
+
+        {filteredPosts.length > 0 && (
+          <div className='posts'>
+            {filteredPosts.map(post =>(
+              <PostCard key={post.id} post = {post} > </PostCard>
+            ))}
+          </div>
         )}
-      </div>
+
+        {filteredPosts.length === 0 && (
+          <p>Não existem Posts</p>
+        )}
+          
+       
+      
       <div className='container-button'>
-        <Button text='Load More Posts' onClick = {this.loadMorePosts} disabled = {noMorePosts}></Button>
+        {!Search_value &&(
+            <Button 
+              text='Load More Posts' 
+              onClick = {this.loadMorePosts} 
+              disabled = {noMorePosts}>               
+            </Button>
+        )}
+       
       </div>
       
     </section>
